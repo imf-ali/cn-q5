@@ -2,7 +2,6 @@ import ApplicationError from "../middleware/applicationError.js";
 import Question from "../model/question.model.js";
 import Option from "../model/options.model.js";
 import mongoose, { Types } from "mongoose";
-import { ObjectId } from "mongodb";
 
 class QuestionRepository{
   
