@@ -1,6 +1,8 @@
 import ApplicationError from "../middleware/applicationError.js";
 import Question from "../model/question.model.js";
 import Option from "../model/options.model.js";
+import mongoose, { Types } from "mongoose";
+import { ObjectId } from "mongodb";
 
 class QuestionRepository{
   
@@ -33,7 +35,30 @@ class QuestionRepository{
 
   async getQuestion(id){
     try {
-      const question = await Question.findById(id).populate('options');
+      const question = await Question.aggregate([
+        {
+          $match: {
+            _id: new mongoose.Types.ObjectId(id),
+          },
+        },
+        {
+          $lookup: {
+            from: 'options',
+            localField: 'options',  
+            foreignField: '_id',
+            as: 'options',
+            pipeline: [
+              {
+                $addFields: {
+                  link_to_vote: {
+                    $concat: ["/options/", { $toString: '$_id' }, "/add_vote"]
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]);
       if(!question){
         throw new ApplicationError('Question not found', 404);
       }
